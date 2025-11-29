@@ -6,3 +6,4 @@ Flask-Migrate
 Flask-Mail
 gunicorn
 python-dotenv
+psycopg2-binary
