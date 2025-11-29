@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block titel %}Second Questionnaire – UEQ{% endblock %}
+{% block content %}
+
+<style>
+.question-text {
+    font-size: 1.45rem !important;
+}
+
+.form-label {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    font-weight: 300;
+}
+</style>
+
+
+<section class="py-3 text-center container">
+    <div class="row py-lg-4">
+        <div class="col-lg-8 col-md-8 mx-auto">
+            <h1 class="fw-light">Post-Discussion Questionnaire</h1>
+            <p class="lead text-body-secondary">
+                Please think about the discussion you just had and rate your agreement with the following statements.
+            </p>
+        </div>
+    </div>
+</section>
+
+
+<div class="album py-3 bg-body-tertiary">
+    <div class="col-6 py-4 mx-auto">
+        
+        <form action="{{ url_for('views.discussion_evaluation') }}" method="post" id="perspective">
+
+            <!-- Q1 -->
+            <label class="form-label">I felt confident expressing my opinion on this topic.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation1" name="disc_evaluation1">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q2 -->
+            <label class="form-label">I was open to listening to my discussion partner's perspective.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation2" name="disc_evaluation2">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q3 -->
+            <label class="form-label">I believe it is possible to find shared understanding on this issue.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation3" name="disc_evaluation3">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q4 -->
+            <label class="form-label">The discussion was respectful and constructive.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation4" name="disc_evaluation4">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q5 -->
+            <label class="form-label">I felt comfortable sharing my honest thoughts and opinions.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation5" name="disc_evaluation5">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q6 -->
+            <label class="form-label">I learned something new from the discussion.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation6" name="disc_evaluation6">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q7 -->
+            <label class="form-label">I felt listened to and understood by my conversation partner.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation7" name="disc_evaluation7">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q8 -->
+            <label class="form-label">The discussion encouraged me to think more deeply about the topic.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation8" name="disc_evaluation8">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q9 -->
+            <label class="form-label">I would participate in a similar discussion again.</label>
+            <input type="range" class="form-range custom-track-color" min="1" max="5"
+                   id="disc_evaluation9" name="disc_evaluation9">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Q10 (Text) -->
+            <label class="form-label mt-4">Additional reflections:</label>
+            <textarea class="form-control" id="disc_evaluation10" name="disc_evaluation10"
+                      rows="4" placeholder="Write anything you want to add..."></textarea>
+
+            <!-- Submit -->
+            <div class="col-8 mx-auto">
+                <hr class="my-4">
+                <div class="d-grid gap-2 col-10 mx-auto">
+                    <button class="btn btn-primary btn-lg" type="submit">Next</button>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

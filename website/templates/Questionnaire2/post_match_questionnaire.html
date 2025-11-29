@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block titel %}Post-Discussion Questionnaire{% endblock %}
+
+{% block content %}
+
+<style>
+.question-text {
+    font-size: 1.45rem !important;
+}
+
+.form-label {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    font-weight: 300;
+}
+</style>
+
+<section class="py-3 text-center container">
+    <div class="row py-lg-4">
+        <div class="col-lg-8 col-md-8 mx-auto">
+            <h1 class="fw-light">Post-Discussion Questionnaire</h1>
+            <p class="lead text-body-secondary">
+                Please think about the discussion you just had and rate your agreement with the following statements.
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="album py-3 bg-body-tertiary">
+    <div class="col-6 py-4 mx-auto">
+        <form action="{{ url_for('views.post_match_questionnaire') }}" method="post" id="post_match_questionnaire">
+
+            <!-- Question 1 -->
+            <label class="form-label">1. I generally support the main idea or goal of this topic.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match1_support" name="post_match1_support">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 2 -->
+            <label class="form-label">2. I believe the benefits of this topic outweigh its risks.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match2_benefits" name="post_match2_benefits">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 3 -->
+            <label class="form-label">3. I would personally take action in support of this issue.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match3_action" name="post_match3_action">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 4 -->
+            <label class="form-label">4. I think this issue has an overall positive impact on society.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match4_impact" name="post_match4_impact">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 5 -->
+            <label class="form-label">5. I believe this topic deserves more public attention.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match5_attention" name="post_match5_attention">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 6 -->
+            <label class="form-label">6. I trust the experts or authorities who promote this topic.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match6_trust" name="post_match6_trust">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 7 -->
+            <label class="form-label">7. I feel emotionally connected to this issue.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match7_econnected" name="post_match7_econnected">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 8 -->
+            <label class="form-label">8. I think opposing views on this topic are often based on misunderstanding.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match8_misunderstanding" name="post_match8_misunderstanding">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 9 -->
+            <label class="form-label">9. I believe addressing this issue should be a priority.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match9_priority" name="post_match9_priority">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+            <!-- Question 10 -->
+            <label class="form-label">10. I think this topic aligns with my personal values.</label>
+            <input type="range" class="form-range custom-track-color" min="-2" max="2" step="1" value="0"
+                   id="post_match10_values" name="post_match10_values">
+            <div class="custom-labels">
+                <span>Strongly disagree</span>
+                <span>Disagree</span>
+                <span>Neutral</span>
+                <span>Agree</span>
+                <span>Strongly agree</span>
+            </div>
+
+
+            <!-- Question 11 (Text) -->
+            <label class="form-label mt-4"> Additional reflections:</label>
+            <textarea class="form-control" id="post_reflection" name="post_reflection"
+                      rows="4" placeholder="Write anything you want to add..."></textarea>
+
+            <!-- Submit -->
+            <div class="d-grid gap-2 col-10 mx-auto mt-4">
+                <button class="btn btn-primary btn-lg" type="submit">Next</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

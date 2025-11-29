@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block titel %}Interaction Part 2{% endblock %}
+{% block content %}
+
+{% set topic = user.topic %}
+
+{% if topic == 'climate' %}
+    {% set round_title = "Climate Activism" %}
+    {% set intro_topic = "Climate activism, climate protesters and movements such as the 'Last Generation'" %}
+{% elif topic == 'ai_employment' %}
+    {% set round_title = "AI in the Workplace" %}
+    {% set intro_topic = "Concrete experiences and opinions about AI systems at work or in education" %}
+{% elif topic == 'freedom_speech' %}
+    {% set round_title = "Content Moderation & Regulation" %}
+    {% set intro_topic = "Rules, bans and moderation of content on social media platforms" %}
+{% else %}
+    {% set round_title = topic|capitalize|replace('_', ' ') %}
+    {% set intro_topic = "The selected topic" %}
+{% endif %}
+
+<section class="py-3 text-center container">
+  <div class="row py-lg-3">
+    <h1 class="fw-light">Discussion Round 2: {{ round_title }}</h1>
+    <div class="col-lg-9 col-md-9 mx-auto">
+      <p class="lead text-body-secondary">
+        Welcome to the second discussion round.<br>
+        <b>Discussion focus: {{ intro_topic }}</b>
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="album py-5 bg-body-tertiary">
+  <div class="row align-items-center justify-content-center">
+    <div class="col-lg-6 col-md-10 col-sm-12">
+      <div>
+        <div id="jitsi-container"></div>
+        <div id="flash-message" class="flash-message" style="display: none;">
+          You have 1 minute left.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-8 col-sm-12">
+      <div class="d-grid gap-2 text-center">
+        <h2 class="fw-light">Discussion Prompts</h2>
+        <ul class="list-group d-grid gap-2">
+
+          {% if topic == 'climate' %}
+            <li class="list-group-item lead text-body-secondary">
+              <b>1. What do you think about climate activism in general?</b><br>
+              (e.g. Fridays for Future)
+            </li>
+            <li class="list-group-item lead text-body-secondary">
+              <b>2. What is your opinion on more disruptive protests?</b><br>
+              (e.g. road blockades, disrupting events, actions by the “Last Generation”)
+            </li>
+            <li class="list-group-item lead text-body-secondary">
+              <b>3. What emotions do such protest actions trigger in you?</b>
+            </li>
+
+          {% elif topic == 'ai_employment' %}
+            <li class="list-group-item lead text-body-secondary">
+              <b>1. Have you already used AI tools (e.g. chatbots, automation, decision systems) in your work or studies?</b>
+            </li>
+            <li class="list-group-item lead text-body-secondary">
+              <b>2. In which situations do you think AI should <i>not</i> make decisions about people (e.g. hiring, firing, grading)?</b>
+            </li>
+            <li class="list-group-item lead text-body-secondary">
+              <b>3. How do you feel when important decisions that affect you are made or supported by AI?</b>
+            </li>
+
+          {% elif topic == 'freedom_speech' %}
+            <li class="list-group-item lead text-body-secondary">
+              <b>1. Have you ever seen content on social media that you think should have been removed?</b>
+            </li>
+            <li class="list-group-item lead text-body-secondary">
+              <b>2. Who should decide what is allowed and what is not – platforms, governments, independent bodies, or users?</b>
+            </li>
+            <li class="list-group-item lead text-body-secondary">
+              <b>3. Do you think current moderation practices go too far, or not far enough?</b>
+            </li>
+
+          {% else %}
+            <li class="list-group-item lead text-body-secondary"><b>1. Which specific examples illustrate your opinion on this topic?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>2. In which situations do you strongly agree or disagree with how this topic is handled today?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>3. How do you feel emotionally when you think about these situations?</b></li>
+          {% endif %}
+
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Part 2 loaded");
+
+    let api = null;
+    let timersStarted = false;
+
+    function timerCallback() {
+        console.log("Part 2: timer fired → go to Part 3 (future.html)");
+        if (api) {
+            api.dispose();
+        }
+        window.location.href = "{{ url_for('views.future') }}";
+    }
+
+    function showFlashMessage() {
+        console.log("Part 2: flash message shown");
+        const el = document.getElementById('flash-message');
+        if (el) el.style.display = 'block';
+    }
+
+    function startDiscussionTimers() {
+        if (timersStarted) return;
+        timersStarted = true;
+        console.log("Part 2: starting discussion timers (5 min, 4 min warning)");
+        // REAL TIMINGS
+        setTimeout(timerCallback, 300000);    // 5:00 total
+        setTimeout(showFlashMessage, 240000); // 4:00 warning
+    }
+
+    function checkAndStartTimers() {
+        if (!api) return;
+        try {
+            const count = api.getNumberOfParticipants(); // includes yourself
+            console.log("Part 2: participant count =", count);
+            if (count >= 2) {
+                startDiscussionTimers();
+            }
+        } catch (e) {
+            console.error("Part 2: error getting participant count:", e);
+        }
+    }
+
+    try {
+        const meetingid = "{{ user.meeting_id }}";
+        const room_name = 'Part Two ' + meetingid;
+
+        api = new JitsiMeetExternalAPI('meet.jit.si', {
+            roomName: room_name,
+            width: '100%',
+            height: 500,
+            parentNode: document.querySelector('#jitsi-container')
+        });
+
+        // When YOU fully joined
+        api.addListener('videoConferenceJoined', (event) => {
+            console.log("Part 2: videoConferenceJoined", event);
+            checkAndStartTimers();
+        });
+
+        // When your PARTNER joins
+        api.addListener('participantJoined', (event) => {
+            console.log("Part 2: participantJoined", event);
+            checkAndStartTimers();
+        });
+
+    } catch (e) {
+        console.error("Jitsi init failed in Part 2:", e);
+    }
+});
+</script>
+
+
+
+
+{% endblock %}

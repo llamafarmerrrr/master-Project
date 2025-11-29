@@ -1,0 +1,185 @@
+{% extends "base.html" %} 
+{% block title %}Home{% endblock %} 
+{% block content%}
+<section class="py-3 text-center container">
+  <div class="row py-lg-4 align-items-center">
+    <div class="col-lg-6 col-md-6 mx-auto">
+      <h1 class="fw-light">Political Dialogue Platform</h1>
+      <p class="lead text-body-secondary">
+        <br>On this platform, participants can engage in respectful political discussions on a variety of current and socially relevant topics. 
+        The aim is to enable constructive dialogue between individuals with different perspectives.
+      </p>
+      <p class="lead text-body-secondary">
+        The platform is designed to cover a wide range of public issues, such as technological change, social values, human rights, 
+        economic developments, and other political questions that shape modern society.
+        For the purpose of testing and evaluation, we currently focus on two example topics: artificial intelligence and its impact 
+        on employment, and freedom of speech on social media platforms.
+      </p>
+      <p class="lead text-body-secondary">
+        These kinds of topics often generate strong and diverse reactions. It is therefore important to exchange views in a calm, 
+        fair, and constructive manner, allowing for deeper understanding between participants.
+      </p>
+    </div>
+    <div class="col-lg-6 col-md-6 mx-auto">
+      <img src="{{url_for('static', filename='dialogue.jpg')}}" class="rounded d-block mx-auto" width="75%"/>
+    </div>
+  </div>
+</section>
+
+<!-- 🔹 copy of index.css styles so cards look the same -->
+<style>
+  .topic-image {
+      width: 100%;
+      height: 220px;            /* fixed height for all images */
+      object-fit: cover;        /* ensures same size + cropping */
+      border-radius: 8px;
+  }
+  .equal-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+  }
+  .equal-card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+  }
+
+  .row{
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+    justify-content: space-evenly;
+}
+</style>
+
+{% if user.demo %}
+  {% if user.haspartner %}
+  <div class="py-2 text-center">
+    <h3 class="fw-light">Participate in the Discussion</h3>
+  </div>
+  <div class="album py-3 bg-body-tertiary">
+    <div class="py-3 text-center container">
+      <div class="py-3 col-md-8 shadow-sm rounded mx-auto bg-white"> 
+        <p class="lead text-body-secondary">
+          A suitable discussion partner has been found for you. The username is <b>{{ partner.user_name }}</b>. 
+          On the scheduled date, which you received via email, you can proceed to the dialogue here. 
+          On the next page, the further process will be explained to you.
+        </p>
+        <hr>
+        {% if button_disabled %}
+        <div class="d-grid gap-2 col-6 mx-auto">
+          <button disabled class="btn btn-primary">Continue to Interaction</button>
+        </div>
+        {% else %}
+        <div class="d-grid gap-2 col-6 mx-auto">
+          <a class="btn btn-primary" id="start" href="/Interaction/introduction" role="button">Continue to Interaction</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="py-2 text-center">
+    <h3 class="fw-light">Participate in the Discussion</h3>
+  </div>
+  <div class="album py-3 bg-body-tertiary">
+    <div class="py-3 text-center container">
+      <div class="py-3 col-md-8 shadow-sm rounded mx-auto bg-white">
+        <p class="lead text-body-secondary">Thank you for registering. You have successfully signed up for the political dialogue.</p>  
+        <p class="lead text-body-secondary">
+          So far, no suitable discussion partner has been assigned to you. You will receive an <strong>email</strong> as soon as a matching partner is found. 
+          This email will explain the next steps and schedule the interaction.
+        </p>
+        <p class="lead text-body-secondary">
+          If you do <strong>not receive an email</strong> by the specified date, no partner could be found for you, and unfortunately, you cannot take part in the dialogue.
+        </p>  
+        <form method="get">
+          <div class="d-grid gap-2 col-6 mx-auto">
+            <button class="btn btn-primary" type="submit">Refresh</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% else %}
+
+<div class="py-2 text-center">
+  <h3 class="fw-light">Register for the Discussion</h3>
+</div>
+
+<div class="album py-3 bg-body-tertiary">
+  <div class="py-3 text-center container">
+    <div class="py-3 col-lg-10 col-md-10 rounded mx-auto ">
+
+      <p class="lead text-body-secondary">
+        Please select one of the following topics for your political dialogue. After choosing a topic, 
+        you will be guided through the registration and questionnaires.
+      </p>
+
+      <div class="row row-cols-1 row-cols-md-3 g-3 mt-3">
+
+        <!-- Topic 1: Climate Activism -->
+        <!-- <div class="col">
+          <div class="card shadow-sm h-100">
+            <div class="card-body text-center d-flex flex-column">
+              <h4 class="fw-light">Climate Activism</h4>
+              <p class="card-text lead text-body-secondary mt-2">
+                Discuss the topic of climate activism and climate protests.
+              </p>
+              <form method="post" class="mt-auto">
+                <input type="hidden" name="topic" value="climate">
+                <button class="btn btn-primary" type="submit">Select Topic</button>
+              </form>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- Topic 2: AI & Employment -->
+        <div class="col">
+          <div class="card shadow-sm h-100">
+            <div class="card-body text-center d-flex flex-column">
+              <h4 class="fw-light">Artificial Intelligence & Employment</h4>
+              <!-- <img src="{{ url_for('static', filename='AI.jpg') }}" class="topic-image my-2" /> -->
+              <p class="card-text lead text-body-secondary mt-2">
+                Explore how AI is transforming the job market and employment.
+              </p>
+              <form method="post" class="mt-auto">
+                <input type="hidden" name="topic" value="ai_employment">
+                <button class="btn btn-primary" type="submit">Select Topic</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topic 3: Freedom of Speech -->
+        <div class="col">
+          <div class="card shadow-sm h-100">
+            <div class="card-body text-center d-flex flex-column">
+              <h4 class="fw-light">Freedom of Speech on Social Media</h4>
+              <!-- <img src="{{ url_for('static', filename='SM.jpg') }}" class="topic-image my-2" /> -->
+              <p class="card-text lead text-body-secondary mt-2">
+                Debate freedom of speech, moderation, and responsibility on social media platforms.
+              </p>
+              <form method="post" class="mt-auto">
+                <input type="hidden" name="topic" value="freedom_speech">
+                <button class="btn btn-primary" type="submit">Select Topic</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

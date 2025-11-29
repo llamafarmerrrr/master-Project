@@ -1,0 +1,7 @@
+flask
+Flask-SQLAlchemy
+flask-login
+mysql-connector-python
+Flask-Migrate
+Flask-Mail
+gunicorn

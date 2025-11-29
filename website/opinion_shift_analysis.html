@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block title %}Opinion Shift Analysis{% endblock %}
+
+{% block content %}
+<style>
+    .shift-positive {
+        color: #198754;
+        font-weight: bold;
+    }
+    .shift-negative {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .shift-neutral {
+        color: #6c757d;
+    }
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+    .openness-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+    }
+</style>
+
+<section class="py-3 text-center container">
+    <div class="row py-lg-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-light">Your Opinion Journey</h1>
+            <p class="lead text-body-secondary">
+                See how your perspective evolved through the discussion on 
+                <strong>{{ user.topic|capitalize|replace('_', ' ') }}</strong>
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="album py-3 bg-body-tertiary">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                
+                <!-- Two-Column Layout for Metrics -->
+                <div class="row mb-4">
+                    <!-- Overall Shift Summary -->
+                    {% if avg_shift is not none %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card shadow-sm metric-card h-100">
+                            <div class="card-body text-center p-4">
+                                <h3 class="mb-3">Overall Opinion Shift</h3>
+                                <div class="display-4 mb-2">
+                                    {% if avg_shift > 0 %}+{% endif %}{{ avg_shift|float|round(2) }}
+                                </div>
+                                <p class="mb-0">
+                                    {% if avg_shift > 0.5 %}
+                                        Your views became more positive after the discussion
+                                    {% elif avg_shift|abs > 0.5 %}
+                                        Your views became more critical after the discussion
+                                    {% else %}
+                                        Your views remained relatively stable
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Openness Score Card -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card shadow-sm openness-card h-100">
+                            <div class="card-body text-center p-4">
+                                <h3 class="mb-3">Your Openness Score</h3>
+                                {% if openness_score is not none and openness_score != 'None' %}
+                                    <div class="display-4 mb-2">
+                                        {{ openness_score|round(1) }}
+                                    </div>
+                                    <p class="mb-0">
+                                        {% if openness_category %}
+                                            Category: <strong>{{ openness_category }}</strong>
+                                        {% else %}
+                                            <span class="opacity-75">Category not available</span>
+                                        {% endif %}
+                                    </p>
+                                    <small class="mt-2 d-block opacity-75">
+                                        Based on your initial questionnaire responses
+                                    </small>
+                                {% else %}
+                                    <div class="display-6 mb-2 text-muted">
+                                        Not Available
+                                    </div>
+                                    <p class="mb-0 small">
+                                        <!-- Debug info (remove after testing) -->
+                                        Score value: {{ openness_score }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Line Chart: Before vs After -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Before vs After Discussion</h4>
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bar Chart: Detailed Question-by-Question Shift -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Question-by-Question Shift Analysis</h4>
+                        <p class="text-muted mb-3">Green bars indicate positive shifts, red bars indicate negative shifts</p>
+                        <canvas id="shiftChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Grouped Bar Chart: Before/After Comparison -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Detailed Before/After Comparison</h4>
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('views.reward') }}" class="btn btn-primary btn-lg">Continue to Reward</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const questionsData = {{ questions|tojson }};
+    const beforeData = {{ before_values|tojson }};
+    const afterData = {{ after_values|tojson }};
+    const shiftsData = {{ shifts|tojson }};
+
+    const labels = questionsData.map((q, i) => 'Q' + (i + 1));
+
+    // Value label mapping
+    const valueMap = {
+        -2: 'Strongly Disagree',
+        -1: 'Disagree',
+        0: 'Neutral',
+        1: 'Agree',
+        2: 'Strongly Agree'
+    };
+
+    // 1. Line Chart: Before vs After
+    const lineCtx = document.getElementById('lineChart');
+    if (lineCtx) {
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Before Discussion',
+                        data: beforeData,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'After Discussion',
+                        data: afterData,
+                        borderColor: 'rgb(153, 102, 255)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                aspectRatio: 2.5,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function (ctx) {
+                                return questionsData[ctx[0].dataIndex];
+                            },
+                            label: function (context) {
+                                const value = context.parsed.y;
+                                return `${context.dataset.label}: ${valueMap[value] ?? value}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: -2,
+                        max: 2,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function (value) {
+                                return valueMap[value] ?? value;
+                            }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Bar Chart: Opinion Shifts
+    const shiftCtx = document.getElementById('shiftChart');
+    if (shiftCtx) {
+        // Color bars based on positive/negative shift
+        const barColors = shiftsData.map(shift => {
+            if (shift === null) return 'rgb(200, 200, 200)';
+            return shift > 0 ? 'rgba(25, 135, 84, 0.8)' : shift < 0 ? 'rgba(220, 53, 69, 0.8)' : 'rgba(108, 117, 125, 0.8)';
+        });
+
+        new Chart(shiftCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Opinion Shift',
+                    data: shiftsData,
+                    backgroundColor: barColors,
+                    borderColor: barColors.map(c => c.replace('0.8', '1')),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                aspectRatio: 2.5,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function (ctx) {
+                                return questionsData[ctx[0].dataIndex];
+                            },
+                            label: function (context) {
+                                const shift = context.parsed.y;
+                                if (shift === null) return 'No data';
+                                const direction = shift > 0 ? '↑ More positive' : shift < 0 ? '↓ More negative' : '→ No change';
+                                return `Shift: ${shift > 0 ? '+' : ''}${shift} ${direction}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Opinion Change'
+                        },
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Questions'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 3. Grouped Bar Chart: Before/After Comparison
+    const comparisonCtx = document.getElementById('comparisonChart');
+    if (comparisonCtx) {
+        new Chart(comparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Before Discussion',
+                        data: beforeData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'After Discussion',
+                        data: afterData,
+                        backgroundColor: 'rgba(153, 102, 255, 0.7)',
+                        borderColor: 'rgb(153, 102, 255)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                aspectRatio: 2.5,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function (ctx) {
+                                return questionsData[ctx[0].dataIndex];
+                            },
+                            label: function (context) {
+                                const value = context.parsed.y;
+                                return `${context.dataset.label}: ${valueMap[value] ?? value}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: -2,
+                        max: 2,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function (value) {
+                                return valueMap[value] ?? value;
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Agreement Level'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Questions'
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

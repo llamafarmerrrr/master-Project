@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Opinion Questionnaire{% endblock %}
+{% block content %}
+<section class="py-3 text-center container">
+    <div class="row py-lg-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-light">Political Dialogue Questionnaire</h1>
+            <p class="lead text-body-secondary">
+                To find a suitable discussion partner with an opposing viewpoint, please rate your agreement with the following 15 statements on a scale from Strongly Disagree to Strongly Agree.
+            </p>
+            <p class="lead text-body-secondary">
+                You selected the topic: <b>{{ user.topic|capitalize|replace('_', ' ') }}</b>
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="album py-3 bg-body-tertiary">
+    <div class="container">
+        <form action="{{ url_for('views.new_questionnaire_part1') }}" method="POST">
+            <div class="py-3 col-md-10  rounded mx-auto  p-4">
+                
+                <h3 class="fw-bold mb-4">Part A: Openness to Different Views (5 Questions)</h3>
+                <p class="lead text-body-secondary">Your answers here determine if you are eligible to participate.</p>
+
+                {# Attitude Question 1: attitude_open_to_differ #}
+                {% set question_number = 1 %}
+                {% set question_text = "I am open to hearing opinions on this topic that differ from my own." %}
+                {% set name_prefix = 'attitude' %}
+                {% include 'opinion_slider_content.html' %}
+
+                {# Attitude Question 2: attitude_see_both_sides #}
+                {% set question_number = 2 %}
+                {% set question_text = "I can see both positive and negative aspects of this issue." %}
+                {% include 'opinion_slider_content.html' %}
+
+                {# Attitude Question 3: attitude_willing_adjust #}
+                {% set question_number = 3 %}
+                {% set question_text = "I would be willing to adjust my view if presented with convincing evidence." %}
+                {% include 'opinion_slider_content.html' %}
+
+                {# Attitude Question 4: attitude_valid_concerns #}
+                {% set question_number = 4 %}
+                {% set question_text = "People who disagree with me on this topic may still have valid concerns." %}
+                {% include 'opinion_slider_content.html' %}
+
+                {# Attitude Question 5: attitude_common_ground #}
+                {% set question_number = 5 %}
+                {% set question_text = "I believe it's possible to find common ground between opposing views on this issue." %}
+                {% include 'opinion_slider_content.html' %}
+                <div class="d-grid gap-2 col-6 mx-auto mt-5">
+                    <button class="btn btn-primary btn-lg" type="submit">Proceed to Part B</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    // Function to update the displayed value next to the slider thumb
+    function updateSliderValue(sliderId) {
+        const slider = document.getElementById(sliderId);
+        const valueDisplay = document.getElementById('current-value-' + sliderId);
+        if (slider && valueDisplay) {
+            valueDisplay.textContent = slider.value;
+        }
+    }
+
+    // List of all 15 input IDs
+    const sliderIds = [
+        'attitude1', 'attitude2', 'attitude3', 'attitude4', 'attitude5',
+        'match1', 'match2', 'match3', 'match4', 'match5', 
+        'match6', 'match7', 'match8', 'match9', 'match10'
+    ];
+
+    // Initialize values and attach event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        sliderIds.forEach(id => {
+            const slider = document.getElementById(id);
+            if (slider) {
+                // Initial update
+                updateSliderValue(id);
+                // Attach event listener for real-time update
+                slider.addEventListener('input', () => updateSliderValue(id));
+            }
+        });
+    });
+</script>
+{% endblock %}

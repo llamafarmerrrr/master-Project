@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block title %}Opinion Shift Analysis{% endblock %}
+
+{% block content %}
+<style>
+    .shift-positive {
+        color: #198754;
+        font-weight: bold;
+    }
+    .shift-negative {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .shift-neutral {
+        color: #6c757d;
+    }
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+</style>
+
+<section class="py-3 text-center container">
+    <div class="row py-lg-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="fw-light">Your Opinion Journey</h1>
+            <p class="lead text-body-secondary">
+                See how your perspective evolved through the discussion on 
+                <strong>{{ user.topic|capitalize|replace('_', ' ') }}</strong>
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="album py-3 bg-body-tertiary">
+    <div class="container">
+        <div class="row">
+            <!-- Main Chart -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Before vs After Discussion</h4>
+                        <!-- <canvas id="opinionChart"></canvas> -->
+                    </div>
+                </div>
+
+                <!-- Overall Shift Summary -->
+                {% if avg_shift is not none %}
+                <div class="card shadow-sm metric-card mb-4">
+                    <div class="card-body text-center p-4">
+                        <h3 class="mb-3">Overall Opinion Shift</h3>
+                        <div class="display-4 mb-2">
+                            {% if avg_shift > 0 %}+{% endif %}{{ avg_shift|float|round(2) }}
+                        </div>
+                        <p class="mb-0">
+                            {% if avg_shift > 0.5 %}
+                                Your views became more positive after the discussion
+                            {% elif avg_shift is not none and avg_shift|abs > 0.5 %}
+                                Your views became more critical after the discussion
+                            {% else %}
+                                Your views remained relatively stable
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Question-by-Question Breakdown -->
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Detailed Question Analysis</h4>
+                        <div class="table-responsive">
+
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th class="text-center">Before</th>
+                                        <th class="text-center">After</th>
+                                        <th class="text-center">Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                {% for i in range(questions|length) %}
+                                    {% set shift_val = shifts[i] %}
+
+                                    {% set shift_class =
+                                        'shift-positive' if shift_val is not none and shift_val > 0
+                                        else 'shift-negative' if shift_val is not none and shift_val < 0
+                                        else 'shift-neutral'
+                                    %}
+
+                                    {% set shift_arrow =
+                                        '↑' if shift_val is not none and shift_val > 0
+                                        else '↓' if shift_val is not none and shift_val < 0
+                                        else '→'
+                                    %}
+
+                                    <tr>
+                                        <td>{{ loop.index }}. {{ questions[i] }}</td>
+
+                                        <td class="text-center">
+                                            {% if before_values[i] is not none %}
+                                                {{ before_values[i] }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {% if after_values[i] is not none %}
+                                                {{ after_values[i] }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {% if shift_val is not none %}
+                                                <span class="{{ shift_class }}">
+                                                    {% if shift_val > 0 %}+{% endif %}{{ shift_val }} {{ shift_arrow }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('views.reward') }}" class="btn btn-primary btn-lg">Continue</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('opinionChart');
+    if (!ctx) return;
+
+    const questionsData = {{ questions|tojson }};
+    const beforeData = {{ before_values|tojson }};
+    const afterData = {{ after_values|tojson }};
+
+    const labels = questionsData.map((q, i) => 'Q' + (i + 1));
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Before Discussion',
+                    data: beforeData,
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    tension: 0.3
+                },
+                {
+                    label: 'After Discussion',
+                    data: afterData,
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            aspectRatio: 2,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function (ctx) {
+                            return questionsData[ctx[0].dataIndex];
+                        },
+                        label: function (context) {
+                            const value = context.parsed.y;
+                            const map = {
+                                -2: 'Strongly Disagree',
+                                -1: 'Disagree',
+                                0: 'Neutral',
+                                1: 'Agree',
+                                2: 'Strongly Agree'
+                            };
+                            return `${context.dataset.label}: ${map[value] ?? value}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: -2,
+                    max: 2,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function (value) {
+                            const map = {
+                                -2: 'Strongly Disagree',
+                                -1: 'Disagree',
+                                0: 'Neutral',
+                                1: 'Agree',
+                                2: 'Strongly Agree'
+                            };
+                            return map[value] ?? value;
+                        }
+                    }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

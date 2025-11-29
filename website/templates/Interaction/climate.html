@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block titel %}Interaction Part 1{% endblock %}
+{% block content %}
+
+{% set topic = user.topic %}
+{% if topic == 'climate_change' %}
+    {% set discussion_title = "Climate Change" %}
+    {% set intro_topic = "Concerns about climate change and climate protection" %}
+{% elif topic == 'ai_employment' %}
+    {% set discussion_title = "Artificial Intelligence & Employment" %}
+    {% set intro_topic = "The impact of AI and automation on jobs and the future of work" %}
+{% elif topic == 'freedom_speech' %}
+    {% set discussion_title = "Social Media" %}
+    {% set intro_topic = "The impact of social media on individuals and society" %}
+{% else %}
+    {% set discussion_title = topic|capitalize|replace('_', ' ') %}
+    {% set intro_topic = "The selected topic" %}
+{% endif %}
+
+<section class="py-3 text-center container">
+  <div class="row py-lg-3">
+    <h1 class="fw-light">Discussion Round 1: {{ discussion_title }}</h1>
+    <div class="col-lg-9 col-md-9 mx-auto">
+      <p class="lead text-body-secondary">
+        Welcome to the first discussion round.<br>
+        <b>Discussion focus: {{ intro_topic }}</b>
+      </p>
+      <p class="lead text-body-secondary">
+        The prompts below are meant to guide your conversation.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="album py-5 bg-body-tertiary">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-md-10 col-sm-12">
+      <h3>Important notes before you join the meeting:</h3>
+      <p class="lead text-body-secondary">
+        Once you have joined the meeting, please do not leave it. Wait for your conversation partner. 
+        You will be automatically forwarded to the next discussion round. If you accidentally leave the meeting, 
+        reload the page and join the meeting again.
+      </p>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-10 col-sm-12">
+      <div class="d-grid gap-2 text-center">
+        <div id="jitsi-container"></div>
+        <div id="flash-message" class="flash-message" style="display: none;">
+          You have 1 minute left.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-8 col-sm-12">
+      <div class="d-grid gap-2 text-center">
+        <h2 class="fw-light">Discussion Prompts</h2>
+        <ul class="list-group d-grid gap-2">
+
+          {% if topic == 'climate_change' %}
+            <li class="list-group-item lead text-body-secondary"><b>1. What concerns do you have about climate change?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>2. Do you feel personally threatened by climate change? Why or why not?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>3. What do you think about different climate protection measures?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>4. What consequences do you see in these climate protection measures for everyday life and society?</b></li>
+
+          {% elif topic == 'ai_employment' %}
+            <li class="list-group-item lead text-body-secondary"><b>1. How do you think AI and automation will affect jobs in the future?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>2. Are you personally worried about your own job or career because of AI?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>3. Which changes through AI in the workplace do you see as positive, and which as problematic?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>4. What role should governments or companies play in dealing with job losses caused by AI?</b></li>
+
+          {% elif topic == 'freedom_speech' %}
+            <li class="list-group-item lead text-body-secondary"><b>1. How does social media influence your everyday life?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>2. Do you think social media has a rather positive or negative impact on mental health? Why?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>3. What do you think about the role of social media in politics and public opinion?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>4. Have you ever changed your behaviour because of something you saw on social media? If yes, how?</b></li>
+
+          {% else %}
+            <li class="list-group-item lead text-body-secondary"><b>1. What is personally most important to you in this topic?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>2. What worries or hopes do you have regarding this topic?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>3. Which aspects of this topic do you find most controversial?</b></li>
+            <li class="list-group-item lead text-body-secondary"><b>4. Where do you see possible common ground between different positions?</b></li>
+          {% endif %}
+
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Part 1 loaded");
+
+    let api = null;
+    let timersStarted = false;
+
+    function timerCallback() {
+        console.log("Part 1: timer fired → go to Part 2");
+        if (api) {
+            api.dispose();
+        }
+        window.location.href = "{{ url_for('views.opinion') }}";
+    }
+
+    function showFlashMessage() {
+        console.log("Part 1: flash message shown");
+        const el = document.getElementById('flash-message');
+        if (el) el.style.display = 'block';
+    }
+
+    function startDiscussionTimers() {
+        if (timersStarted) return;
+        timersStarted = true;
+        console.log("Part 1: starting discussion timers (5 min, 4 min warning)");
+        // REAL TIMINGS
+        setTimeout(timerCallback, 280000);    // 4 min 40 sec → redirect
+        setTimeout(showFlashMessage, 220000); // 3 min 40 sec → “1 minute left”
+    }
+
+    function checkAndStartTimers() {
+        if (!api) return;
+        try {
+            const count = api.getNumberOfParticipants(); // includes yourself
+            console.log("Part 1: participant count =", count);
+            if (count >= 2) {
+                startDiscussionTimers();
+            }
+        } catch (e) {
+            console.error("Part 1: error getting participant count:", e);
+        }
+    }
+
+    try {
+        const meetingid = "{{ user.meeting_id }}";
+        const room_name = 'Part One ' + meetingid;
+
+        api = new JitsiMeetExternalAPI('meet.jit.si', {
+            roomName: room_name,
+            width: '100%',
+            height: 500,
+            parentNode: document.querySelector('#jitsi-container'),
+            userInfo: { displayName: "{{ user.user_name }}" }
+        });
+
+        // When YOU fully joined → check if partner is already there
+        api.addListener('videoConferenceJoined', (event) => {
+            console.log("Part 1: videoConferenceJoined", event);
+            checkAndStartTimers();
+        });
+
+        // When SOMEONE joins (usually your partner) → check again
+        api.addListener('participantJoined', (event) => {
+            console.log("Part 1: participantJoined", event);
+            checkAndStartTimers();
+        });
+
+    } catch (e) {
+        console.error("Jitsi init failed in Part 1:", e);
+    }
+});
+</script>
+
+
+
+
+{% endblock %}

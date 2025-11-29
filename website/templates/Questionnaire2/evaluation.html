@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block titel %}Second Questionnaire – Feedback{% endblock %}
+{% block content %}
+
+<style>
+.question-text {
+    font-size: 1.45rem !important;
+}
+
+.form-label {
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    margin-top: 2rem;
+    font-weight: 300;
+}
+</style>
+
+<section class="py-3 text-center container">
+    <div class="row py-lg-5">
+      <div class="col-lg-7 col-md-8 mx-auto">
+        <h1 class="fw-light">Evaluation of the Application</h1>
+        <p class="lead text-body-secondary">
+            Please indicate the extent to which you agree with the following statement 
+            and then answer the subsequent questions.
+        </p>
+      </div>
+    </div>
+</section>
+
+<div class="album py-5 bg-body-tertiary">
+    <div class="col-6 py-3 mx-auto">
+
+        <label class="form-label">I would recommend the use of this application to other people.</label>
+        <input type="range" class="form-range custom-track-color" min="1" max="5" id="eval3" name="eval3" form="eval">
+        <div class="custom-labels">
+            <span class="fw-light">Strongly disagree</span>
+            <span class="fw-light">Neutral</span>
+            <span class="fw-light">Strongly agree</span>
+        </div>   
+
+        <div class="mb-3">
+            <label class="form-label">
+                Did you learn about a new perspective while using the application, 
+                and how did your understanding of this perspective change?
+            </label>
+            <textarea class="form-control" id="perspective" name="perspective" rows="3" form="eval"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">
+                How did the interaction change your perception of social cohesion 
+                and political polarization in society?
+            </label>
+            <textarea class="form-control" id="construct" name="construct" rows="3" form="eval"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">
+                Do you have any additional feedback, improvement suggestions, or comments for the application?
+            </label>
+            <textarea class="form-control" id="feedback" name="feedback" rows="3" form="eval"></textarea>
+        </div>
+
+        <div class="col-8 mx-auto">
+            <hr class="my-4">
+            <form action="#" method="post" id="eval">
+                <div class="d-grid gap-2 col-10 mx-auto">
+                    <button class="btn btn-primary" type="submit">Next</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
