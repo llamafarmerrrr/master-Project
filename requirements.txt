@@ -5,3 +5,4 @@ mysql-connector-python
 Flask-Migrate
 Flask-Mail
 gunicorn
+python-dotenv
