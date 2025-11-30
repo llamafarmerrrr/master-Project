@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User
-from werkzeug.security import generate_password_hash, check_password_hash
-from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
-from flask_mail import Message
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from .models import User
+from . import db, send_email_safe
+
 
 auth = Blueprint('auth', __name__)
 
@@ -94,22 +95,22 @@ def sign_up():
                 db.session.commit()
 
                 # 📧 E-MAIL AN DEN NEUEN NUTZER SENDEN
-                try:
-                    msg = Message(
-                        subject="Tolerance Together – Registration Confirmation",
-                        recipients=[email]
-                    )
-                    msg.body = (
+                                # 📧 E-MAIL AN DEN NEUEN NUTZER SENDEN
+                                # 📧 E-MAIL AN DEN NEUEN NUTZER SENDEN
+                ok = send_email_safe(
+                    subject="Tolerance Together – Registration Confirmation",
+                    recipients=[email],
+                    body=(
                         f"Hello,\n\n"
                         f"Your account on Tolerance Together has been successfully created with the email: {email}.\n\n"
                         f"If this was NOT you, please contact us immediately at: togethertolerant@gmail.com\n\n"
                         f"Best regards,\n"
                         f"Tolerance Together Team"
                     )
-                    mail.send(msg)
-                except Exception as e:
-                    # Nur in der Konsole melden, Registrierung nicht abbrechen
-                    print("Signup email error:", e)
+                )
+                if not ok:
+                    print("Signup email error: see [MAIL ERROR] log above")
+
 
                 login_user(new_user, remember=True)
                 flash('Registration was successful! Please sign in to join the discussion.', category='success')
