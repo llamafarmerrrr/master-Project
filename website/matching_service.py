@@ -1,11 +1,9 @@
-from datetime import datetime, timedelta
-from itertools import combinations
-
 from flask import render_template
-from flask_mail import Message
+
+from datetime import datetime, timedelta, time, date
 
 from .models import UserOpinion, OpinionDimension, User, Match, db
-from . import mail
+from . import send_email_safe
 
 def time_overlap(u1, u2):
     """
@@ -272,26 +270,16 @@ class MatchingService:
                     slot_label = slot  # fallback
 
             # ---------- Send zusage email to both users ----------
+                        # ---------- Send zusage email to both users ----------
             try:
-                # Email to user A
-                m1 = Message(
-                    'You have been matched for a dialogue session',
-                    recipients=[user.email]
-                )
-                m1.html = render_template(
+                html_a = render_template(
                     'Email/zusage.html',
                     user=user,
                     partner=partner,
                     topic=user.topic,
                     slot_label=slot_label
                 )
-
-                # Email to user B
-                m2 = Message(
-                    'You have been matched for a dialogue session',
-                    recipients=[partner.email]
-                )
-                m2.html = render_template(
+                html_b = render_template(
                     'Email/zusage.html',
                     user=partner,
                     partner=user,
@@ -299,12 +287,22 @@ class MatchingService:
                     slot_label=slot_label
                 )
 
-                mail.send(m1)
-                mail.send(m2)
-                print(f"[BATCH MATCH] Match emails sent to {user.email} and {partner.email}")
+                ok_a = send_email_safe(
+                    subject='You have been matched for a dialogue session',
+                    recipients=[user.email],
+                    html=html_a
+                )
+                ok_b = send_email_safe(
+                    subject='You have been matched for a dialogue session',
+                    recipients=[partner.email],
+                    html=html_b
+                )
+
+                print(f"[BATCH MATCH] Email status A={ok_a}, B={ok_b} for {user.email} & {partner.email}")
 
             except Exception as mail_exc:
-                print(f"[BATCH MATCH] Failed to send match emails: {mail_exc}")
+                # This should almost never trigger now, but keep it as extra safety
+                print(f"[BATCH MATCH] Unexpected error while preparing match emails: {mail_exc}")
 
             db.session.commit()
             stats["matches_created"] += 1
