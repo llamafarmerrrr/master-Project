@@ -2,6 +2,15 @@
 {% block titel %}Dialogue Platform{% endblock %}
 {% block content %}
 
+{% if current_user.is_authenticated and current_user.haspartner and partner %}
+<div class="alert alert-success text-center" role="alert" style="font-size: 1.2rem;">
+    🎉 You have been <strong>matched</strong> with <strong>{{ partner.user_name }}</strong>!
+    {% if slot_label %}
+    Your dialogue is scheduled for <strong>{{ slot_label }}</strong>.
+    {% endif %}
+</div>
+{% endif %}
+
 <section class="py-3 text-center container">
     <div class="row py-lg-4">
         <div class="col-lg-7 col-md-6 mx-auto">
