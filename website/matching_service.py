@@ -3,7 +3,6 @@ from flask import render_template
 from datetime import datetime, timedelta, time, date
 
 from .models import UserOpinion, OpinionDimension, User, Match, db
-from . import send_email_safe
 
 def time_overlap(u1, u2):
     """
