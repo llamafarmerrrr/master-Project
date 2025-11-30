@@ -1,13 +1,9 @@
-# views.py — unified and cleaned
-
-from flask import Blueprint, render_template, request, flash, url_for, redirect, session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta, time, date
 from threading import Thread
 
-from flask_mail import Message
-
-from . import db, mail
+from . import db, send_email_safe
 from .models import User, SuggestedTopic, ScheduledEmail
 from .matching_service import MatchingService
 from . import save_questionnaire_responses, get_openness_category
@@ -68,15 +64,16 @@ def send_due_scheduled_emails():
                 continue
 
             try:
-                msg = Message(
+                ok = send_email_safe(
                     subject=email.subject,
-                    sender="TogetherTolerant@gmail.com",
                     recipients=[user.email],
+                    html=email.body_html,
                 )
-                msg.html = email.body_html
-                mail.send(msg)
-                email.sent = True
-                print(f"[FOLLOWUP] Sent follow-up email id={email.id} to {user.email}")
+                if ok:
+                    email.sent = True
+                    print(f"[FOLLOWUP] Sent follow-up email id={email.id} to {user.email}")
+                else:
+                    print(f"[FOLLOWUP] Failed to send follow-up email id={email.id} to {user.email}")
             except Exception as exc:
                 # don't mark as sent so we can retry later
                 print(f"[FOLLOWUP] Error sending email id={email.id} to {user.email}: {exc}")
@@ -314,37 +311,22 @@ def find_matches_for_user(user_id):
         slot_label = None
         if common_slot:
             try:
-                # common_slot is stored as ISO string, e.g. "2025-11-28T11:00:00"
                 dt = datetime.fromisoformat(common_slot)
-                # Nice human-readable format, adjust language if needed
                 slot_label = dt.strftime('%A, %d %B %Y, %H:%M')
             except Exception as e:
                 print(f"[MATCH] Could not parse common_slot '{common_slot}': {e}")
-                slot_label = common_slot  # fallback to raw string
+                slot_label = common_slot  # fallback
 
         # ---------- Send notification emails to both users ----------
         try:
-            # Email to user A
-            m1 = Message(
-                'You have been matched for a dialogue session',
-                sender='TogetherTolerant@gmail.com',
-                recipients=[user.email]
-            )
-            m1.html = render_template(
+            html_a = render_template(
                 'Email/zusage.html',
                 user=user,
                 partner=matched_user,
                 topic=user.topic,
                 slot_label=slot_label
             )
-
-            # Email to user B
-            m2 = Message(
-                'You have been matched for a dialogue session',
-                sender='TogetherTolerant@gmail.com',
-                recipients=[matched_user.email]
-            )
-            m2.html = render_template(
+            html_b = render_template(
                 'Email/zusage.html',
                 user=matched_user,
                 partner=user,
@@ -352,9 +334,18 @@ def find_matches_for_user(user_id):
                 slot_label=slot_label
             )
 
-            mail.send(m1)
-            mail.send(m2)
-            print(f"[MATCH] Match emails sent to {user.email} and {matched_user.email}")
+            ok_a = send_email_safe(
+                subject='You have been matched for a dialogue session',
+                recipients=[user.email],
+                html=html_a,
+            )
+            ok_b = send_email_safe(
+                subject='You have been matched for a dialogue session',
+                recipients=[matched_user.email],
+                html=html_b,
+            )
+
+            print(f"[MATCH] Email status A={ok_a}, B={ok_b} for {user.email} & {matched_user.email}")
 
         except Exception as mail_exc:
             print(f"[MATCH] Warning: failed to send match emails: {mail_exc}")
@@ -583,13 +574,15 @@ def reward():
 
     try:
         if getattr(current_user, 'behaviour_score', None):
-            payout = Message(
-                'Payout Information',
-                sender='TogetherTolerant@gmail.com',
-                recipients=[current_user.email]
+            html = render_template('Email/auszahlung.html', user=current_user)
+            ok = send_email_safe(
+                subject='Payout Information',
+                recipients=[current_user.email],
+                html=html,
             )
-            payout.html = render_template('Email/auszahlung.html', user=current_user)
-            mail.send(payout)
+            if not ok:
+                print(f"Error sending payout email to {current_user.email}")
+                flash('There was an error sending the payout email. Please contact the study administrator.', 'error')
     except Exception as exc:
         print(f"Error sending payout email: {exc}")
         flash('There was an error sending the payout email. Please contact the study administrator.', 'error')
