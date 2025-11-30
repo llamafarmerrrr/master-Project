@@ -1,6 +1,16 @@
-{% extends "base.html" %} 
-{% block title %}Home{% endblock %} 
-{% block content%}
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+{% if user.haspartner and partner %}
+<div class="alert alert-success text-center" role="alert" style="font-size: 1.2rem;">
+    🎉 You have been <strong>matched</strong> with <strong>{{ partner.user_name }}</strong>!
+    {% if slot_label %}
+    Your dialogue is scheduled for <strong>{{ slot_label }}</strong>.
+    {% endif %}
+</div>
+{% endif %}
+
 <section class="py-3 text-center container">
   <div class="row py-lg-4 align-items-center">
     <div class="col-lg-6 col-md-6 mx-auto">
@@ -54,21 +64,35 @@
     margin-right: -15px;
     margin-left: -15px;
     justify-content: space-evenly;
-}
+  }
 </style>
 
 {% if user.demo %}
   {% if user.haspartner %}
   <div class="py-2 text-center">
     <h3 class="fw-light">Participate in the Discussion</h3>
+
+    
   </div>
+
   <div class="album py-3 bg-body-tertiary">
     <div class="py-3 text-center container">
+      {% if partner %}
+      {% if slot_label %}
+        <h2 class="fw-light mt-3">
+          You have been matched with <b>{{ partner.user_name }}</b> on
+          <b>{{ slot_label }}</b>.
+        </h2>
+      {% else %}
+        <h2 class="fw-light mt-3">
+          You have been matched with <b>{{ partner.user_name }}</b>.
+        </h2>
+      {% endif %}
+    {% endif %}
       <div class="py-3 col-md-8 shadow-sm rounded mx-auto bg-white"> 
         <p class="lead text-body-secondary">
-          A suitable discussion partner has been found for you. The username is <b>{{ partner.user_name }}</b>. 
-          On the scheduled date, which you received via email, you can proceed to the dialogue here. 
-          On the next page, the further process will be explained to you.
+          A suitable discussion partner has been found for you. When the scheduled time is reached,
+          you can continue to the dialogue here. On the next page, the further process will be explained to you.
         </p>
         <hr>
         {% if button_disabled %}
@@ -90,14 +114,14 @@
   <div class="album py-3 bg-body-tertiary">
     <div class="py-3 text-center container">
       <div class="py-3 col-md-8 shadow-sm rounded mx-auto bg-white">
-        <p class="lead text-body-secondary">Thank you for registering. You have successfully signed up for the political dialogue.</p>  
         <p class="lead text-body-secondary">
-          So far, no suitable discussion partner has been assigned to you. You will receive an <strong>email</strong> as soon as a matching partner is found. 
-          This email will explain the next steps and schedule the interaction.
-        </p>
-        <p class="lead text-body-secondary">
-          If you do <strong>not receive an email</strong> by the specified date, no partner could be found for you, and unfortunately, you cannot take part in the dialogue.
+          Thank you for registering. You have successfully signed up for the political dialogue.
         </p>  
+        <p class="lead text-body-secondary">
+          So far, no suitable discussion partner has been assigned to you.
+          As soon as a match is found, this page will show the username of your partner
+          and the scheduled date of your discussion.
+        </p>
         <form method="get">
           <div class="d-grid gap-2 col-6 mx-auto">
             <button class="btn btn-primary" type="submit">Refresh</button>
@@ -125,7 +149,8 @@
       <div class="row row-cols-1 row-cols-md-3 g-3 mt-3">
 
         <!-- Topic 1: Climate Activism -->
-        <!-- <div class="col">
+        <!--
+        <div class="col">
           <div class="card shadow-sm h-100">
             <div class="card-body text-center d-flex flex-column">
               <h4 class="fw-light">Climate Activism</h4>
@@ -138,7 +163,8 @@
               </form>
             </div>
           </div>
-        </div> -->
+        </div>
+        -->
 
         <!-- Topic 2: AI & Employment -->
         <div class="col">

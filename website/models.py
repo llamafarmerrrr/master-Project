@@ -286,14 +286,14 @@ class SuggestedTopic(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-class ScheduledEmail(db.Model):
-    __tablename__ = 'scheduled_emails'
+# class ScheduledEmail(db.Model):
+#     __tablename__ = 'scheduled_emails'
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    send_at = db.Column(db.DateTime, nullable=False)
-    subject = db.Column(db.String(200), nullable=False)
-    body_html = db.Column(db.Text, nullable=False)
+#     send_at = db.Column(db.DateTime, nullable=False)
+#     subject = db.Column(db.String(200), nullable=False)
+#     body_html = db.Column(db.Text, nullable=False)
 
-    sent = db.Column(db.Boolean, default=False)
+#     sent = db.Column(db.Boolean, default=False)
