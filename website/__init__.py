@@ -13,12 +13,31 @@ from threading import Thread  # for scheduler threads
 # 🚫 IMPORTANT: do NOT import models here to avoid circular imports
 # from .models import ScheduledEmail  # ❌ remove this
 
-# Load environment variables from .env (DATABASE_URL)
+# Load environment variables from .env (DATABASE_URL, MAIL_*)
 load_dotenv()
 
 db = SQLAlchemy()
 mail = Mail()
 
+
+def send_email_safe(subject, recipients, body=None, html=None, sender=None):
+    """
+    Central helper to send emails. Uses Flask-Mail and logs any error
+    without crashing the whole request.
+    """
+    try:
+        msg = Message(subject=subject, recipients=recipients, sender=sender)
+        if body:
+            msg.body = body
+        if html:
+            msg.html = html
+
+        mail.send(msg)
+        print(f"[MAIL] Sent email to {recipients} with subject '{subject}'")
+        return True
+    except Exception as e:
+        print(f"[MAIL ERROR] Failed to send email to {recipients}: {e}")
+        return False
 
 def create_app():
     # instance_relative_config=True so app.instance_path points to /instance
@@ -45,14 +64,30 @@ def create_app():
 
     print("📌 USING DATABASE:", app.config['SQLALCHEMY_DATABASE_URI'])
 
-    # 📧 Email Configuration
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USE_SSL'] = False
-    app.config['MAIL_USERNAME'] = 'togethertolerant@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'xnqo fixw edjp zcdj'  # 16-char app password
-    app.config['MAIL_DEFAULT_SENDER'] = ('Tolerant Together', 'togethertolerant@gmail.com')
+       # 📧 Email Configuration (read from environment so it works on hosting)
+    # Examples for Gmail (set these in your .env / hosting env):
+    #   MAIL_SERVER=smtp.gmail.com
+    #   MAIL_PORT=587
+    #   MAIL_USE_TLS=true
+    #   MAIL_USERNAME=togethertolerant@gmail.com
+    #   MAIL_PASSWORD=your_16_char_app_password_without_spaces
+    #   MAIL_DEFAULT_SENDER_EMAIL=togethertolerant@gmail.com
+    #   MAIL_DEFAULT_SENDER_NAME=Tolerance Together
+
+    app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'true').lower() == 'true'
+    app.config['MAIL_USE_SSL'] = False  # we use TLS on port 587
+
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+
+    default_sender_email = os.getenv('MAIL_DEFAULT_SENDER_EMAIL', app.config['MAIL_USERNAME'])
+    default_sender_name = os.getenv('MAIL_DEFAULT_SENDER_NAME', 'Tolerance Together')
+    app.config['MAIL_DEFAULT_SENDER'] = (default_sender_name, default_sender_email)
+
+    # make sure sending is NOT suppressed
+    app.config['MAIL_SUPPRESS_SEND'] = False
 
     mail.init_app(app)
     db.init_app(app)
@@ -480,4 +515,3 @@ def init_scheduler(app):
         scheduler = MatchingScheduler(app)
         scheduler.start()
     return scheduler
-
