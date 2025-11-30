@@ -1,87 +1,51 @@
-{% extends "base.html" %} 
-{% block title %}Sign Up / Registration{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Sign Up / Registration{% endblock %}
 {% block content %}
 
-<style>
-  form{
-    padding-left: 100px;
-    padding-right: 100px;
-  }
-</style>
 <section class="col-8 py-5 mx-auto">
   <form method="POST">
     <h2 align="center" class="fw-light">Registration / Sign Up</h2>
     <p class="lead text-body-secondary text-center">
-      Please provide the following information truthfully. Your data will only be used anonymously for evaluation purposes.
+      Please provide the following information truthfully. Your data will only be used anonymously for evaluation
+      purposes.
       <strong>Only your username</strong> will be visible to other participants.<br>
-      
     </p>
     <hr>
     <p class="lead text-body-secondary text-center">
-      Please enter your <strong>valid email address</strong>. This is needed so we can send you further information about your participation.<br>
-      
+      Please enter your <strong>valid email address</strong>. This is needed so we can send you further information
+      about your participation.<br>
     </p>
     <hr>
     <div class="form-group">
       <label for="email" class="lead">Email</label>
-      <input
-        type="email"
-        class="form-control"
-        id="email"
-        name="email"
-        placeholder="Enter your email"
-      />
+      <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" />
     </div>
     <div class="form-group">
       <label for="email1" class="lead">Email (Confirm)</label>
-      <input
-        type="email"
-        class="form-control"
-        id="email1"
-        name="email1"
-        placeholder="Enter your email again"
-      />
+      <input type="email" class="form-control" id="email1" name="email1" placeholder="Enter your email again" />
     </div>
     <div class="form-group">
       <label for="user_name" class="lead">Username</label>
-      <input
-        type="text"
-        class="form-control"
-        id="user_name"
-        name="user_name"
-        placeholder="Enter your username"
-      />
+      <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter your username" />
     </div>
     <div class="form-group">
       <label for="password1" class="lead">Password</label>
-      <input
-        type="password"
-        class="form-control"
-        id="password1"
-        name="password1"
-        placeholder="Enter your password"
-      />
+      <input type="password" class="form-control" id="password1" name="password1" placeholder="Enter your password" />
     </div>
     <div class="form-group">
       <label for="password2" class="lead">Password (Confirm)</label>
-      <input
-        type="password"
-        class="form-control"
-        id="password2"
-        name="password2"
-        placeholder="Confirm your password"
-      />
+      <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm your password" />
     </div>
     <div class="text-center">
       <div class="form-check">
         <input class="form-check-input bg-secondary" type="checkbox" value="" id="security" name="security">
         <label class="form-check-label lead text-body-secondary" for="security">
-          I have read and agree to the 
+          I have read and agree to the
           <a class="link-primary" href="https://bwsyncandshare.kit.edu/s/zpyey6NWd9fnbGf" target="_blank">
             Consent Form and Privacy Policy
           </a>.
           <br>
-          
+
         </label>
       </div>
     </div>
@@ -98,7 +62,7 @@
   const checkbox = document.getElementById('security');
   const submitButton = document.getElementById('register');
 
-  checkbox.addEventListener('change', function() {
+  checkbox.addEventListener('change', function () {
     submitButton.disabled = !this.checked;
   });
 </script>
