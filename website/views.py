@@ -7,7 +7,7 @@ from .models import User, SuggestedTopic
 from .matching_service import MatchingService
 from . import save_questionnaire_responses, get_openness_category
 
-views = Blueprint('views', _name_)
+views = Blueprint('views', __name__)
 
 
 def is_button_disabled():
