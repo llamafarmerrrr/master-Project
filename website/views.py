@@ -133,24 +133,38 @@ def new_questionnaire():
     return render_template('new_questionnaire_part2.html', user=current_user)
 
 
-def generate_time_slots():
-    today = date.today()
-    days_until_sunday = (6 - today.weekday()) % 7
-    start_day = today + timedelta(days=days_until_sunday)
+from datetime import datetime, timedelta, time, date
 
-    times = [11, 13, 15, 18]
+def generate_time_slots():
+    now = datetime.now()
+    today = date.today()
+    year = today.year
+
+    # Fixed window: December 1–10 of this year
+    start_day = date(year, 12, 1)
+    end_day = date(year, 12, 10)
+
+    # If today is after Dec 10, you can optionally early-return:
+    if today > end_day:
+        return []
+
+    times = [12, 15, 17]  # 12:00, 15:00 (3pm), 17:00 (5pm)
     slots = []
 
-    for d in range(7):
-        this_day = start_day + timedelta(days=d)
-        prefix = this_day.strftime('%a %d.%m.')
-
+    day = start_day
+    while day <= end_day:
         for hour in times:
-            dt = datetime.combine(this_day, time(hour))
-            slots.append({
-                "value": dt.isoformat(),
-                "label": f"{prefix} {dt.strftime('%H:%M')}"
-            })
+            dt = datetime.combine(day, time(hour))
+
+            # Only keep future slots (hide past times & past days)
+            if dt >= now:
+                prefix = day.strftime('%a %d.%m.')
+                slots.append({
+                    "value": dt.isoformat(),
+                    "label": f"{prefix} {dt.strftime('%H:%M')}"
+                })
+
+        day += timedelta(days=1)
 
     return slots
 
