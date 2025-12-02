@@ -171,7 +171,8 @@ class MatchingService:
     def create_match(user_a, user_b, opposition_score, decision, common_slot=None):
         """
         Create and store a Match row between two users.
-        For openness-based matching, `opposition_score` is just the compatibility score.
+        For openness-based matching, `opposition_score` is
+        just the compatibility score.
         """
         if not user_a or not user_b:
             return None
@@ -180,16 +181,18 @@ class MatchingService:
         if user_a.id == user_b.id:
             return None
 
-        # Basic match object
+        # 🔹 NEW: clamp compatibility/score into the 0–4 range allowed by the DB
+        stored_score = max(0.0, min(float(opposition_score), 4.0))
+
         match = Match(
             user_a_id=user_a.id,
             user_b_id=user_b.id,
             topic=user_a.topic or user_b.topic,
-            opposition_score=opposition_score,
+            opposition_score=stored_score,      # use clamped value
             match_decision=decision,
             scheduled_time_slot=common_slot,
             both_open_minded=(not user_a.is_extremist and not user_b.is_extremist),
-            status="accepted",  # directly accepted in this design
+            status="accepted",
             created_at=datetime.utcnow(),
             expires_at=datetime.utcnow() + timedelta(days=14),
         )
